@@ -1,15 +1,3 @@
-// import required modules and establish database connection
-const runInquirer = async () => {
-  const inquirer = await import('inquirer');
-  const mysql = require('mysql2');
-  const connection = mysql.createConnection({
-  host: 'localhost',
-  user: 'root',
-  password: 'password',
-  database: 'company_db'
-});
-
-// function to add a role
 function addRole() {
   // query the database for existing departments
   connection.query('SELECT id, name FROM department', (err, res) => {
@@ -55,5 +43,62 @@ function addRole() {
     });
   });
 }
-};
-runInquirer();
+
+// function to display departments, roles and employees
+function displayData() {
+  // query the database for departments
+  connection.query('SELECT * FROM department', (err, departments) => {
+    if (err) throw err;
+
+    // prompt user to select department
+    inquirer.prompt([
+      {
+        name: 'department',
+        type: 'list',
+        message: 'Select a department:',
+        choices: departments.map(department => department.name)
+      }
+    ]).then(departmentAnswer => {
+      // query the database for roles in selected department
+      connection.query(`SELECT role.id, role.title, role.salary 
+      FROM role 
+      JOIN department ON role.department_id = department.id 
+      WHERE department.name = ?`, [departmentAnswer.department], (err, roles) => {
+        if (err) throw err;
+
+        // prompt user to select role
+        inquirer.prompt([
+          {
+            name: 'role',
+            type: 'list',
+            message: 'Select a role:',
+            choices: roles.map(role => role.title)
+          }
+        ]).then(roleAnswer => {
+          // query the database for employees in selected department and role
+          connection.query(`SELECT employee.id, employee.first_name, employee.last_name 
+          FROM employee 
+          JOIN role ON employee.role_id = role.id 
+          JOIN department ON role.department_id = department.id 
+          WHERE department.name = ? AND role.title = ?`, [departmentAnswer.department, roleAnswer.role], (err, employees) => {
+            if (err) throw err;
+
+            // prompt user to select employee
+            inquirer.prompt([
+              {
+                name: 'employee',
+                type: 'list',
+                message: 'Select an employee:',
+                choices: employees.map(employee => employee.first_name + ' ' + employee.last_name)
+              }
+            ]).then(employeeAnswer => {
+              console.log(`You selected employee: ${employeeAnswer.employee}`);
+              // return to main menu
+              mainMenu();
+            });
+          });
+        });
+      });
+    });
+  });
+} 
