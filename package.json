@@ -1,0 +1,26 @@
+{
+  "name": "sql-challenge-from-rice",
+  "version": "1.0.0",
+  "description": "## challenge 12 From RICE",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nhunguyen-debug/SQL-challenge-from-Rice.git"
+  },
+  "keywords": [
+    "Node.js",
+    "SQL"
+  ],
+  "author": "Wren",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/nhunguyen-debug/SQL-challenge-from-Rice/issues"
+  },
+  "homepage": "https://github.com/nhunguyen-debug/SQL-challenge-from-Rice#readme",
+  "dependencies": {
+    "express": "^4.18.2"
+  }
+}
