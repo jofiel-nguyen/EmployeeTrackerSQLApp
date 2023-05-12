@@ -1,3 +1,5 @@
+USE company_db;
+
 -- create department table
 CREATE TABLE department (
   id INT PRIMARY KEY,

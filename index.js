@@ -1,7 +1,8 @@
 // import required modules and establish database connection
-const inquirer = require('inquirer');
-const mysql = require('mysql2');
-const connection = mysql.createConnection({
+const runInquirer = async () => {
+  const inquirer = await import('inquirer');
+  const mysql = require('mysql2');
+  const connection = mysql.createConnection({
   host: 'localhost',
   user: 'root',
   password: 'password',
@@ -54,3 +55,5 @@ function addRole() {
     });
   });
 }
+};
+runInquirer();
