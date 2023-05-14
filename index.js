@@ -1,104 +1,125 @@
-function addRole() {
-  // query the database for existing departments
-  connection.query('SELECT id, name FROM department', (err, res) => {
-    if (err) throw err;
+const inquirer = require("inquirer");
+const mainMenuPrompt = {
+  type: "list",
+  name: "mainMenu",
+  message: "What would you like to do?",
+  choices: [
+    "View all departments",
+    "View all roles",
+    "View all employees",
+    "Add a department",
+    "Add a role",
+    "Add an employee",
+    "Update an employee role",
+    "Exit",
+  ],
+};
 
-    // prompt user for role information
-    inquirer.prompt([
-      {
-        name: 'title',
-        type: 'input',
-        message: 'Enter the title of the role:'
-      },
-      {
-        name: 'salary',
-        type: 'number',
-        message: 'Enter the salary for the role:'
-      },
-      {
-        name: 'department',
-        type: 'list',
-        message: 'Select the department for the role:',
-        choices: res.map(department => ({
-          name: department.name,
-          value: department.id
-        }))
-      }
-    ]).then(answers => {
-      // insert the new role into the database
-      connection.query(
-        'INSERT INTO role SET ?',
-        {
-          title: answers.title,
-          salary: answers.salary,
-          department_id: answers.department
-        },
-        (err, res) => {
-          if (err) throw err;
-          console.log(`New role "${answers.title}" added to database.`);
-          // return to main menu
-          mainMenu();
-        }
-      );
-    });
-  });
+const addDepartmentPrompt = {
+  type: "input",
+  name: "departmentName",
+  message: "What is the name of the department?",
+};
+
+const addRolePrompt = [
+  {
+    type: "input",
+    name: "roleTitle",
+    message: "What is the title of the role?",
+  },
+  {
+    type: "input",
+    name: "roleSalary",
+    message: "What is the salary for the role?",
+  },
+  {
+    type: "list",
+    name: "departmentId",
+    message: "Which department does the role belong to?",
+    choices: async () => {
+      const departments = await db.getAllDepartments();
+      return departments.map((department) => ({
+        name: department.name,
+        value: department.id,
+      }));
+    },
+  },
+];
+
+const addEmployeePrompt = [
+  {
+    type: "input",
+    name: "firstName",
+    message: "What is the employee's first name?",
+  },
+  {
+    type: "input",
+    name: "lastName",
+    message: "What is the employee's last name?",
+  },
+  {
+    type: "list",
+    name: "roleId",
+    message: "What is the employee's role?",
+    choices: async () => {
+      const roles = await db.getAllRoles();
+      return roles.map((role) => ({ name: role.title, value: role.id }));
+    },
+  },
+  {
+    type: "list",
+    name: "managerId",
+    message: "Who is the employee's manager?",
+    choices: async () => {
+      const managers = await db.getAllEmployees();
+      return managers.map((manager) => ({
+        name: `${manager.first_name} ${manager.last_name}`,
+        value: manager.id,
+      }));
+    },
+  },
+];
+
+const updateEmployeePrompt = [
+  {
+    type: "list",
+    name: "employeeId",
+    message: "Which employee's role do you want to update?",
+    choices: async () => {
+      const employees = await db.getAllEmployees();
+      return employees.map((employee) => ({
+        name: `${employee.first_name} ${employee.last_name}`,
+        value: employee.id,
+      }));
+    },
+  },
+  {
+    type: "list",
+    name: "roleId",
+    message: "What is the employee's new role?",
+    choices: async () => {
+      const roles = await db.getAllRoles();
+      return roles.map((role) => ({ name: role.title, value: role.id }));
+    },
+  },
+];
+
+async function viewAllDepartments() {
+  const departments = await db.getAllDepartments();
+  printTable(departments);
 }
 
-// function to display departments, roles and employees
-function displayData() {
-  // query the database for departments
-  connection.query('SELECT * FROM department', (err, departments) => {
-    if (err) throw err;
+async function viewAllRoles() {
+  const roles = await db.getAllRolesWithDepartment();
+  printTable(roles);
+}
 
-    // prompt user to select department
-    inquirer.prompt([
-      {
-        name: 'department',
-        type: 'list',
-        message: 'Select a department:',
-        choices: departments.map(department => department.name)
-      }
-    ]).then(departmentAnswer => {
-      // query the database for roles in selected department
-      connection.query(`SELECT role.id, role.title, role.salary 
-      FROM role 
-      JOIN department ON role.department_id = department.id 
-      WHERE department.name = ?`, [departmentAnswer.department], (err, roles) => {
-        if (err) throw err;
-
-        // prompt user to select role
-        inquirer.prompt([
-          {
-            name: 'role',
-            type: 'list',
-            message: 'Select a role:',
-            choices: roles.map(role => role.title)
-          }
-        ]).then(roleAnswer => {
-          // query the database for employees in selected department and role
-          connection.query(`SELECT employee.id, employee.first_name, employee.last_name 
-          FROM employee 
-          JOIN role ON employee.role_id = role.id 
-          JOIN department ON role.department_id = department.id 
-          WHERE department.name = ? AND role.title = ?`, [departmentAnswer.department, roleAnswer.role], (err, employees) => {
-            if (err) throw err;
-
-            // prompt user to select employee
-            inquirer.prompt([
-              {
-                name: 'employee',
-                type: 'list',
-                message: 'Select an employee:',
-                choices: employees.map(employee => employee.first_name + ' ' + employee.last_name)
-              }
-            ]).then(employeeAnswer => {
-              console.log(`You selected employee: ${employeeAnswer.employee}`);
-              // return to main menu
-              mainMenu();
-            });
-          });
-        });
-      });
-    });
-  });
-} 
+async function viewAllEmployees() {
+  const employees = await db.getAllEmployeesWithDetails();
+  printTable(employees);
+}
+async function addDepartment() {
+  const { departmentName } = await inquirer.prompt(addDepartmentPrompt);
+  await db.createDepartment(departmentName);
+  console.log(`Added ${departmentName} to the database.`);
+}
