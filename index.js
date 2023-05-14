@@ -2,8 +2,7 @@ const inquirer = require("inquirer");
 const express = require('express');
 const PORT = process.env.PORT || 3001;
 const app = express();
-const db = require('./db/connection'); // Replace with the correct path to your connection.js file
-
+const db = require('./db/connection'); 
 // Define inquirer prompts
 const mainMenuPrompt = {
   type: "list",
@@ -56,10 +55,19 @@ async function handleMainMenuChoice() {
 
   handleMainMenuChoice(); // Prompt user again after choice is completed
 }
+
 async function viewAllEmployees() {
   try {
-    const [rows, fields] = await connection.execute('SELECT * FROM employee');
-    console.log(rows);
+    const query = `
+      SELECT e.id, e.first_name, e.last_name, r.title, d.name AS department, r.salary, CONCAT(m.first_name, ' ', m.last_name) AS manager
+      FROM employee e
+      LEFT JOIN role r ON e.role_id = r.id
+      LEFT JOIN department d ON r.department_id = d.id
+      LEFT JOIN employee m ON e.manager_id = m.id
+    `;
+    const [rows, fields] = await connection.query(query);
+
+    console.table(rows);
   } catch (err) {
     console.error('Error retrieving employees:', err.message);
   }
