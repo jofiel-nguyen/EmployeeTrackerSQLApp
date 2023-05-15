@@ -1,59 +1,81 @@
-const inquirer = require("inquirer");
+const inquirer = require('inquirer');
+const mysql = require('mysql');
 const express = require('express');
+
 const PORT = process.env.PORT || 3001;
 const app = express();
-const db = require('./db/connection'); 
-// Define inquirer prompts
+
+const db = mysql.createPool({
+  host: 'localhost',
+  user: 'root',
+  password: 'password',
+  database: 'company_db',
+  waitForConnections: true,
+  connectionLimit: 10,
+  queueLimit: 0,
+});
+
+db.getConnection((err, connection) => {
+  if (err) {
+    console.error('Error connecting to database:', err.stack);
+    return;
+  }
+
+  console.log('Connected to database as ID', connection.threadId);
+
+  connection.release();
+});
+
 const mainMenuPrompt = {
-  type: "list",
-  name: "mainMenu",
-  message: "What would you like to do?",
+  type: 'list',
+  name: 'mainMenu',
+  message: 'What would you like to do?',
   choices: [
-    "View all employees",
-    "View all employees by department",
-    "View all employees by manager",
-    "Add an employee",
-    "Remove an employee",
-    "Update employee role",
-    "Update employee manager",
-    "Exit",
+    'View all employees',
+    'View all employees by department',
+    'View all employees by manager',
+    'Add an employee',
+    'Remove an employee',
+    'Update employee role',
+    'Update employee manager',
+    'Exit',
   ],
 };
 
-// Define functions to handle inquirer prompts
 async function handleMainMenuChoice() {
   const { mainMenu } = await inquirer.prompt(mainMenuPrompt);
 
   switch (mainMenu) {
-    case "View all employees":
+    case 'View all employees':
       await viewAllEmployees();
       break;
-    case "View all employees by department":
+    case 'View all employees by department':
       await viewEmployeesByDepartment();
       break;
-    case "View all employees by manager":
+    case 'View all employees by manager':
       await viewEmployeesByManager();
       break;
-    case "Add an employee":
+    case 'Add an employee':
       await addEmployee();
       break;
-    case "Remove an employee":
+    case 'Remove an employee':
       await removeEmployee();
       break;
-    case "Update employee role":
+    case 'Update employee role':
       await updateEmployeeRole();
       break;
-    case "Update employee manager":
+    case 'Update employee manager':
       await updateEmployeeManager();
       break;
-    case "Exit":
-      console.log("Goodbye!");
+    case 'Exit':
+      console.log('Goodbye!');
       process.exit();
+      break;
     default:
-      console.log("Invalid choice.");
+      console.log('Invalid choice.');
   }
 
-  handleMainMenuChoice(); // Prompt user again after choice is completed
+  handleMainMenuChoice();
 }
 
 async function viewAllEmployees() {
