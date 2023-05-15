@@ -17,7 +17,8 @@ SO THAT I can organize and plan my business
 
 The following video shows an example of the application being used from the command line:
 
-[![picturefordemo](./Assets/12-sql-homework-video-thumbnail.png)]
+[![picturefordemo](./Assets/12-sql-homework-video-thumbnail.png)
+<br>
 This is my github link: https://github.com/nhunguyen-debug/SQL-challenge-from-Rice.git
 
 - - -
