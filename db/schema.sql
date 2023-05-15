@@ -5,13 +5,13 @@ CREATE DATABASE company_db;
 USE company_db;
 -- create department table
 CREATE TABLE department (
-  id INT PRIMARY KEY,
+  id INT PRIMARY KEY AUTO_INCREMENT,
   name VARCHAR(30)
 );
 
 -- create role table
 CREATE TABLE role (
-  id INT PRIMARY KEY,
+  id INT PRIMARY KEY AUTO_INCREMENT,
   title VARCHAR(30),
   salary DECIMAL,
   department_id INT,
@@ -20,7 +20,7 @@ CREATE TABLE role (
 
 -- create employees table
 CREATE TABLE employees (
-  id INT PRIMARY KEY,
+  id INT PRIMARY KEY AUTO_INCREMENT,
   first_name VARCHAR(30),
   last_name VARCHAR(30),
   role_id INT,
