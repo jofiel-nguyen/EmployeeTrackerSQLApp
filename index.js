@@ -15,16 +15,6 @@ const db = mysql.createPool({
   queueLimit: 0,
 });
 
-// //db.getConnection((err, connection) => {
-//   if (err) {
-//     console.error('Error connecting to database:', err.stack);
-//     return;
-//   }
-
-//   console.log('Connected to database as ID', connection.threadId);
-
-//   connection.release();
-// });
 
 const mainMenuPrompt = {
   type: 'list',
